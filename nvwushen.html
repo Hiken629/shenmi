@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>米凯拉的锋刃</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://gs.jurieo.com/gemini/fonts-googleapis/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #050505;
+            color: #dcdcdc;
+            font-family: "Microsoft YaHei", sans-serif;
+            padding-bottom: 50px;
+        }
+        .epic-font {
+            font-family: 'Cinzel', serif;
+        }
+        
+        .top-nav {
+            padding: 30px 50px;
+        }
+        .back-btn {
+            color: #D4AF37;
+            text-decoration: none;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+        }
+        .back-btn:hover {
+            color: #fff;
+            text-shadow: 0 0 10px #D4AF37;
+        }
+
+        .portrait-img {
+            width: 100%;
+            border: 2px solid #333;
+            border-radius: 5px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        }
+
+        .boss-name {
+            color: #D4AF37;
+            font-size: 3.5rem;
+            margin-bottom: 0;
+        }
+        .boss-title {
+            color: #777;
+            font-size: 1.2rem;
+            letter-spacing: 5px;
+            margin-bottom: 30px;
+        }
+        .lore-text {
+            color: #aaa;
+            line-height: 1.8;
+            margin-bottom: 40px;
+            border-left: 3px solid #D4AF37;
+            padding-left: 20px;
+        }
+
+        .stat-label {
+            display: flex;
+            justify-content: space-between;
+            color: #ccc;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+        .progress {
+            background-color: #1a1a1a;
+            border-radius: 0; 
+            height: 10px;
+            margin-bottom: 25px;
+            border: 1px solid #222;
+        }
+        .progress-bar {
+            background-color: #D4AF37;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.6); 
+            width: 0; 
+            transition: width 1.5s cubic-bezier(0.2, 0.8, 0.2, 1); 
+        }
+
+        #bgm-toggle {
+            position: fixed;
+            bottom: 40px;
+            right: 50px;
+            color: #777; 
+            font-size: 1rem;
+            letter-spacing: 3px;
+            cursor: pointer;
+            z-index: 9999;
+            transition: all 0.5s ease;
+            user-select: none;
+        }
+
+        #bgm-toggle:hover {
+            color: #ccc;
+        }
+
+        #bgm-toggle.playing {
+            color: #D4AF37;
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
+            animation: textBreathe 3s infinite alternate;
+        }
+
+        @keyframes textBreathe {
+            0% { text-shadow: 0 0 10px rgba(212, 175, 55, 0.4); }
+            100% { text-shadow: 0 0 25px rgba(212, 175, 55, 0.9); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-nav">
+        <a href="index.html#characters" class="back-btn epic-font">&larr; BACK TO THE LANDS BETWEEN</a>
+    </div>
+
+    <div class="container mt-4">
+        <div class="row g-5 align-items-center">
+            
+            <div class="col-md-5">
+                <img src="malianniya.jpg" alt="Malenia" class="portrait-img">
+            </div>
+
+            <div class="col-md-7">
+                <h1 class="boss-name epic-font">MALENIA</h1>
+                <div class="boss-title epic-font">BLADE OF MIQUELLA (米凯拉的锋刃)</div>
+                
+                <p class="lore-text">
+                    “我乃玛莲妮亚，米凯拉的锋刃。未尝败绩。”<br>
+                    神人玛丽卡与拉达冈所生的神人双胞胎之一。她自幼便被猩红腐败所寄生，这既是绝症，也是令人绝望的恐怖力量。在破碎战争中，她与“碎星”拉塔恩在盖利德展开了那场没有胜者的神话之战。
+                </p>
+
+                <h4 class="epic-font mb-4" style="color: #fff; border-bottom: 1px solid #333; padding-bottom: 10px;">ATTRIBUTES</h4>
+                
+                <div class="stat-label"><span>VIGOR (生命力)</span> <span>S</span></div>
+                <div class="progress">
+                    <div class="progress-bar" data-target="95%"></div>
+                </div>
+
+                <div class="stat-label"><span>DEXTERITY (灵巧)</span> <span>S+</span></div>
+                <div class="progress">
+                    <div class="progress-bar" data-target="100%"></div>
+                </div>
+
+                <div class="stat-label"><span>STRENGTH (力量)</span> <span>B</span></div>
+                <div class="progress">
+                    <div class="progress-bar" data-target="60%"></div>
+                </div>
+
+                <div class="stat-label"><span>FAITH (信仰)</span> <span>A</span></div>
+                <div class="progress">
+                    <div class="progress-bar" data-target="80%"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const progressBars = document.querySelectorAll('.progress-bar');
+            setTimeout(() => {
+                progressBars.forEach(bar => {
+                    const targetWidth = bar.getAttribute('data-target');
+                    bar.style.width = targetWidth;
+                });
+            }, 200);
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const bgm = document.getElementById('epic-bgm');
+            const bgmToggle = document.getElementById('bgm-toggle');
+
+            const isPlaying = localStorage.getItem('bgm_playing') === 'true';
+            const savedTime = localStorage.getItem('bgm_time') || 0;
+
+            if (isPlaying) {
+                bgm.currentTime = parseFloat(savedTime);
+                
+                // 跨页自动播放
+                let playPromise = bgm.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        bgmToggle.innerText = 'ON';
+                        bgmToggle.classList.add('playing');
+                    }).catch(error => {
+                        console.warn("浏览器拦截了自动播放，需用户再次点击");
+                        bgmToggle.innerText = 'OFF';
+                        localStorage.setItem('bgm_playing', 'false');
+                    });
+                }
+            } else {
+                bgmToggle.innerText = 'OFF';
+            }
+
+            bgmToggle.addEventListener('click', function() {
+                if (bgm.paused) {
+                    bgm.play();
+                    bgmToggle.innerText = 'ON';
+                    bgmToggle.classList.add('playing');
+                    localStorage.setItem('bgm_playing', 'true');
+                } else {
+                    bgm.pause();
+                    bgmToggle.innerText = 'OFF';
+                    bgmToggle.classList.remove('playing');
+                    localStorage.setItem('bgm_playing', 'false');
+                }
+            });
+
+            setInterval(() => {
+                if (!bgm.paused) {
+                    localStorage.setItem('bgm_time', bgm.currentTime);
+                }
+            }, 500);
+        });
+    </script>
+
+    <audio id="epic-bgm" loop src="bgm.mp3"></audio>
+    <div id="bgm-toggle" class="epic-font">OFF</div>
+</body>
+</html>
