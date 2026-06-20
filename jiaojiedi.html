@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>探索交界地</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://gs.jurieo.com/gemini/fonts-googleapis/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050505;
+            color: #dcdcdc;
+            overflow: hidden; 
+            font-family: "Microsoft YaHei", sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .epic-font {
+            font-family: 'Cinzel', serif;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 40px;
+            left: 50px;
+            color: #D4AF37;
+            text-decoration: none;
+            font-size: 1.5rem; 
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            text-shadow: 0 0 10px rgba(0,0,0,0.8);
+            z-index: 1000;
+        }
+        .back-btn:hover {
+            color: #fff;
+            text-shadow: 0 0 15px #D4AF37;
+        }
+        #cinematic-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #000;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeOutOverlay 1.5s ease 2.5s forwards; 
+            pointer-events: none;
+        }
+        .intro-text {
+            color: #D4AF37;
+            font-size: 3rem;    
+            letter-spacing: 10px;
+            opacity: 0;
+            animation: textGlowSequence 2.5s ease forwards;
+        }
+
+        @keyframes textGlowSequence {
+            0% { opacity: 0; transform: scale(0.95); }
+            20% { opacity: 1; transform: scale(1); text-shadow: 0 0 20px #D4AF37; }
+            80% { opacity: 1; transform: scale(1.02); text-shadow: 0 0 20px #D4AF37; }
+            100% { opacity: 0; transform: scale(1.05); filter: blur(5px); }
+        }
+        @keyframes fadeOutOverlay {
+            to { opacity: 0; visibility: hidden; }
+        }
+
+        .map-container {
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #020202 100%);
+            position: relative; 
+            overflow: hidden;
+            cursor: grab;
+            animation: mapSettle 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+        .map-container:active {
+            cursor: grabbing;
+        }
+        
+        @keyframes mapSettle {
+            0% { filter: brightness(0) blur(10px); }
+            100% { filter: brightness(0.9) blur(0); }
+        }
+
+        .game-map-wrapper {
+            position: absolute; 
+            top: 0; 
+            left: 0;
+            width: 160vw; 
+            transform-origin: 0 0; 
+            will-change: transform; 
+        }
+        
+        .game-map-wrapper img {
+            width: 100%;
+            display: block;
+            filter: drop-shadow(0 0 60px rgba(0,0,0,0.8));
+            pointer-events: none;
+        }
+
+        .grace-point {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #fff 10%, #d4af37 60%, transparent 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 15px 5px rgba(212, 175, 55, 0.5);
+            cursor: pointer;
+            transform: translate(-50%, -50%);
+            animation: pulse 2s infinite alternate;
+            z-index: 10;
+        }
+
+        .grace-point:hover {
+            box-shadow: 0 0 25px 10px rgba(212, 175, 55, 0.8);
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        .grace-label {
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #e8d08c;
+            font-size: 14px;
+            letter-spacing: 2px;
+            white-space: nowrap;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
+            pointer-events: none; 
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.7; box-shadow: 0 0 10px 2px rgba(212, 175, 55, 0.4); }
+            100% { opacity: 1; box-shadow: 0 0 20px 8px rgba(212, 175, 55, 0.7); }
+        }
+
+        #info-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        #info-modal.active {
+            opacity: 1; pointer-events: auto;
+        }
+
+        .modal-glass-card {
+            background: linear-gradient(145deg, rgba(20, 20, 20, 0.95), rgba(5, 5, 5, 0.95));
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 4px;
+            padding: 40px;
+            width: 80%; max-width: 800px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.9), inset 0 0 20px rgba(212,175,55,0.05);
+            position: relative;
+            transform: translateY(30px);
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        #info-modal.active .modal-glass-card {
+            transform: translateY(0);
+        }
+
+        .close-btn {
+            position: absolute; top: 20px; right: 30px;
+            color: #888; font-size: 2.5rem; cursor: pointer; transition: color 0.3s;
+        }
+        .close-btn:hover { color: #D4AF37; }
+        .modal-title { color: #D4AF37; font-size: 2.2rem; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 15px; margin-bottom: 20px;}
+        .modal-img { width: 100%; height: 350px; object-fit: cover; border-radius: 2px; margin-bottom: 20px; border: 1px solid #333; }
+        .modal-desc { color: #ccc; line-height: 1.8; font-size: 1.1rem; }
+
+        #bgm-toggle {
+            position: fixed;
+            bottom: 40px;
+            right: 50px;
+            color: #777; 
+            font-size: 1rem;
+            letter-spacing: 3px;
+            cursor: pointer;
+            z-index: 9999;
+            transition: all 0.5s ease;
+            user-select: none;
+        }
+
+        #bgm-toggle:hover {
+            color: #ccc;
+        }
+
+        #bgm-toggle.playing {
+            color: #D4AF37;
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
+            animation: textBreathe 3s infinite alternate;
+        }
+
+        @keyframes textBreathe {
+            0% { text-shadow: 0 0 10px rgba(212, 175, 55, 0.4); }
+            100% { text-shadow: 0 0 25px rgba(212, 175, 55, 0.9); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="cinematic-overlay">
+        <div class="intro-text epic-font">即使引导早已破碎也请您成为艾尔登之王</div>
+    </div>
+
+    <div class="map-container" id="map-viewport">
+        <div class="game-map-wrapper" id="map-entity">index
+            
+            <a href="index.html" class="back-btn epic-font" onmousedown="event.stopPropagation()">
+                &larr; RETURN TO THE ERDTREE
+            </a>
+
+            <img src="map.jpg" alt="Elden Ring Map" id="map-image">
+
+            <div class="grace-point" style="top: 49%; left: 89%;" 
+                 onmousedown="event.stopPropagation()"
+                 onclick="openModal('天空城', '悬浮风暴之上的古龙古都，见证着黄金树之前的远古荣光。残垣在时空乱流里缓缓崩解，远古的飞龙与兽人在此守望，掩藏着命定之死那令人胆寒的阴影。', 'tiankongchen.png')">
+                <div class="grace-label epic-font">LIMGRAVE</div>
+            </div>
+
+            <div class="grace-point" style="top: 54%; left: 19.5%;" 
+                 onmousedown="event.stopPropagation()"
+                 onclick="openModal('魔法学院', '终年大雾弥漫的湖区，魔法学院雷亚卢卡利亚高耸入云。这里埋藏着关于满月女王与星空律法的古老秘密。', 'modaxueyuan.png')">
+                <div class="grace-label epic-font">RAYA LUCARIA</div>
+            </div>
+
+            <div class="grace-point" style="top: 68%; left: 62%;" 
+                 onmousedown="event.stopPropagation()"
+                 onclick="openModal('盖利德', '被猩红腐败彻底吞噬的荒原，诉说着当年的惨烈神战。天空被染成绝望的暗红色，异变生物在此横行。', 'gailide.png')">
+                <div class="grace-label epic-font">CAELID</div>
+            </div>
+            
+            <div class="grace-point" style="top: 10.2%; left: 58%;" 
+                 onmousedown="event.stopPropagation()"
+                 onclick="openModal('米凯拉的圣树', '扎根于极北之地的遗弃者乐园，曾寄托着取代黄金树的纯真愿景。如今却在猩红腐败的侵蚀下走向凋零，化作凄美而致命的绝望摇篮。', 'shengshu.png')">
+                <div class="grace-label epic-font">MIQUELLA'S HALIGTREE</div>
+            </div>
+
+            <div class="grace-point" style="top: 38.2%; left: 43.5%;" 
+                 onmousedown="event.stopPropagation()"
+                 onclick="openModal('王城罗德尔', '沐浴在黄金树最耀眼光芒下的神圣王城。无数英雄曾倒在它的城墙之下。', 'wangchen.png')">
+                <div class="grace-label epic-font">LEYNDELL</div>
+            </div>
+
+            <div class="grace-point" style="top: 62%; left: 55%;" 
+                 onmousedown="event.stopPropagation()"
+                 onclick="openModal('诺克隆恩', '沉睡于地底深处的永恒之城，虚假的夜空闪烁着清冷的星光。古老的遗族在银泪的幻影中徘徊，静候着属于群星与黑夜的时代', 'nuikelongen.png')">
+                <div class="grace-label epic-font">NOKRONokron</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="info-modal">
+        <div class="modal-glass-card">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 class="modal-title epic-font" id="modal-title">TITLE</h2>
+            <img src="" alt="scenery" class="modal-img" id="modal-img">
+            <p class="modal-desc" id="modal-desc">Description goes here.</p>
+        </div>
+    </div>
+
+    <script>
+        function openModal(title, desc, imgSrc) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-desc').innerText = desc;
+            document.getElementById('modal-img').src = imgSrc;
+            document.getElementById('info-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('info-modal').classList.remove('active');
+        }
+
+        document.getElementById('info-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        const viewport = document.getElementById('map-viewport');
+        const mapEntity = document.getElementById('map-entity');
+        const mapImage = document.getElementById('map-image');
+        
+        let isDragging = false;
+        let startX, startY;
+        let currentX = 0, currentY = 0;
+        let scale = 1;
+
+        function clampBounds() {
+            const scaledWidth = mapEntity.offsetWidth * scale;
+            const scaledHeight = mapEntity.offsetHeight * scale;
+
+            const viewWidth = viewport.clientWidth;
+            const viewHeight = viewport.clientHeight;
+
+            if (scaledWidth >= viewWidth) {
+                const minX = viewWidth - scaledWidth;
+                const maxX = 0;
+                currentX = Math.max(minX, Math.min(currentX, maxX));
+            } else {
+                currentX = (viewWidth - scaledWidth) / 2;
+            }
+
+            if (scaledHeight >= viewHeight) {
+                const minY = viewHeight - scaledHeight;
+                const maxY = 0;
+                currentY = Math.max(minY, Math.min(currentY, maxY));
+            } else {
+                currentY = (viewHeight - scaledHeight) / 2;
+            }
+        }
+
+        function updateTransform() {
+            mapEntity.style.transform = `translate(${currentX}px, ${currentY}px) scale(${scale})`;
+        }
+
+        window.onload = () => {
+            const scaledWidth = mapEntity.offsetWidth;
+            const scaledHeight = mapEntity.offsetHeight;
+            
+            currentX = (viewport.clientWidth - scaledWidth) / 2;
+            currentY = (viewport.clientHeight - scaledHeight) / 2;
+            
+            clampBounds();
+            updateTransform();
+        };
+
+        viewport.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX - currentX;
+            startY = e.clientY - currentY;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            currentX = e.clientX - startX;
+            currentY = e.clientY - startY;
+            
+            clampBounds(); 
+            updateTransform();
+        });
+
+        window.addEventListener('mouseup', () => { isDragging = false; });
+        window.addEventListener('mouseleave', () => { isDragging = false; });
+
+        viewport.addEventListener('wheel', (e) => {
+            e.preventDefault(); 
+            
+            const zoomSensitivity = 0.05;
+            const delta = e.deltaY > 0 ? -1 : 1; 
+            const oldScale = scale;
+            scale += delta * zoomSensitivity;
+            
+            const minScaleX = viewport.clientWidth / mapEntity.offsetWidth;
+            const minScaleY = viewport.clientHeight / mapEntity.offsetHeight;
+            const minScale = Math.max(minScaleX, minScaleY); 
+            
+            scale = Math.max(minScale, Math.min(scale, 2.5));
+
+            const scaleRatio = scale / oldScale;
+            currentX = e.clientX - (e.clientX - currentX) * scaleRatio;
+            currentY = e.clientY - (e.clientY - currentY) * scaleRatio;
+
+            clampBounds(); 
+            updateTransform();
+        }, { passive: false });
+
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const progressBars = document.querySelectorAll('.progress-bar');
+            setTimeout(() => {
+                progressBars.forEach(bar => {
+                    const targetWidth = bar.getAttribute('data-target');
+                    bar.style.width = targetWidth;
+                });
+            }, 200);
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const bgm = document.getElementById('epic-bgm');
+            const bgmToggle = document.getElementById('bgm-toggle');
+
+            const isPlaying = localStorage.getItem('bgm_playing') === 'true';
+            const savedTime = localStorage.getItem('bgm_time') || 0;
+
+            if (isPlaying) {
+                bgm.currentTime = parseFloat(savedTime);
+                
+                let playPromise = bgm.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        bgmToggle.innerText = 'ON';
+                        bgmToggle.classList.add('playing');
+                    }).catch(error => {
+                        console.warn("浏览器拦截了自动播放，需用户再次点击");
+                        bgmToggle.innerText = 'OFF';
+                        localStorage.setItem('bgm_playing', 'false');
+                    });
+                }
+            } else {
+                bgmToggle.innerText = 'OFF';
+            }
+
+            bgmToggle.addEventListener('click', function() {
+                if (bgm.paused) {
+                    bgm.play();
+                    bgmToggle.innerText = 'ON';
+                    bgmToggle.classList.add('playing');
+                    localStorage.setItem('bgm_playing', 'true');
+                } else {
+                    bgm.pause();
+                    bgmToggle.innerText = 'OFF';
+                    bgmToggle.classList.remove('playing');
+                    localStorage.setItem('bgm_playing', 'false');
+                }
+            });
+
+            setInterval(() => {
+                if (!bgm.paused) {
+                    localStorage.setItem('bgm_time', bgm.currentTime);
+                }
+            }, 500);
+        });
+    </script>
+    <audio id="epic-bgm" loop src="bgm.mp3"></audio>
+    <div id="bgm-toggle" class="epic-font">OFF</div>
+</body>
+</html>
